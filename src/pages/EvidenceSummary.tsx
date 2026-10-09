@@ -247,7 +247,7 @@ export const EvidenceSummary: React.FC<EvidenceSummaryProps> = ({
                 icon={<ArrowRight className="w-4 h-4" />}
                 className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3"
               >
-                Ready for Case Reconstruction
+                Begin Case Reconstruction →
               </PrimaryButton>
             </div>
           </div>

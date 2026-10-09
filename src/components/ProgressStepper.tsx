@@ -7,10 +7,9 @@ interface ProgressStepperProps {
 
 export const ProgressStepper: React.FC<ProgressStepperProps> = ({ currentStep = 1 }) => {
   const steps = [
-    { number: '01', title: 'Your Story', status: 'active', desc: 'Narrative & Facts' },
-    { number: '02', title: 'Evidence', status: 'locked', desc: 'Upload documents' },
-    { number: '03', title: 'Review', status: 'locked', desc: 'Verify reconstructed case' },
-    { number: '04', title: 'Case Brief', status: 'locked', desc: 'Traceable complaint dossier' },
+    { number: '01', title: 'Your Story + Evidence', desc: 'Narrative & documents' },
+    { number: '02', title: 'Reconstruct + Analyze', desc: 'Truth graph & legal context' },
+    { number: '03', title: 'Build Your Case', desc: 'Dossier & complaint' },
   ];
 
   return (
