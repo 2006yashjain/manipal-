@@ -6,15 +6,26 @@ import { RoleSelection } from './pages/RoleSelection';
 import { ReviewerGate } from './pages/ReviewerGate';
 import { EligibilityChecker } from './pages/EligibilityChecker';
 import { ConsumerIntake } from './pages/ConsumerIntake';
-import { EvidenceUpcoming } from './pages/EvidenceUpcoming';
+import { EvidenceUpload } from './pages/EvidenceUpload';
+import { EvidenceProcessing } from './pages/EvidenceProcessing';
+import { FactVerification } from './pages/FactVerification';
+import { EvidenceSummary } from './pages/EvidenceSummary';
+import { CaseReconstructionPlaceholder } from './pages/CaseReconstructionPlaceholder';
 import { emptyCaseInput } from './data/demoCase';
+import { syntheticDemoDocuments, syntheticExtractedFacts, syntheticConflicts } from './data/demoEvidence';
 import { ConsumerCaseInput } from './types';
 import { EligibilityResult } from './types/eligibility';
+import { EvidenceDocument, EvidenceFact, EvidenceConflict } from './types/evidence';
 
 export const App: React.FC = () => {
-  // Navigation states: 'landing' | 'role-selection' | 'eligibility-checker' | 'consumer-intake' | 'reviewer-gate' | 'evidence-upcoming'
+  // Navigation states:
+  // 'landing' | 'role-selection' | 'eligibility-checker' | 'consumer-intake' | 'reviewer-gate'
+  // | 'evidence-upload' | 'evidence-processing' | 'fact-verification' | 'evidence-summary' | 'case-reconstruction'
   const [currentView, setCurrentView] = useState<string>('landing');
   const [caseData, setCaseData] = useState<ConsumerCaseInput>(emptyCaseInput);
+  const [documents, setDocuments] = useState<EvidenceDocument[]>(syntheticDemoDocuments);
+  const [facts, setFacts] = useState<EvidenceFact[]>(syntheticExtractedFacts);
+  const [conflicts] = useState<EvidenceConflict[]>(syntheticConflicts);
 
   // Navigation handlers
   const handleStartCase = () => {
@@ -36,9 +47,9 @@ export const App: React.FC = () => {
     setCaseData((prev) => ({
       ...prev,
       consumerEligibility: eligibilityResult,
-      platform: prev.platform || eligibilityResult.rawInput.platformName || '',
-      seller: prev.seller || eligibilityResult.rawInput.sellerName || '',
-      amount: prev.amount || eligibilityResult.rawInput.approximateAmount || '',
+      platform: prev.platform || eligibilityResult.rawInput.platformName || (eligibilityResult.rawInput.purchasedDescription?.includes('Dell') ? 'ExampleMart' : ''),
+      seller: prev.seller || eligibilityResult.rawInput.sellerName || (eligibilityResult.rawInput.purchasedDescription?.includes('Dell') ? 'TechWorld Store' : ''),
+      amount: prev.amount || eligibilityResult.rawInput.approximateAmount || (eligibilityResult.rawInput.purchasedDescription?.includes('Dell') ? '54,999' : ''),
       parties: {
         ...prev.parties,
         marketplace: prev.parties.marketplace || eligibilityResult.rawInput.platformName || '',
@@ -50,7 +61,27 @@ export const App: React.FC = () => {
   };
 
   const handleContinueToEvidence = () => {
-    setCurrentView('evidence-upcoming');
+    setCurrentView('evidence-upload');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleStartProcessing = () => {
+    setCurrentView('evidence-processing');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleProcessingComplete = () => {
+    setCurrentView('fact-verification');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleProceedToSummary = () => {
+    setCurrentView('evidence-summary');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleProceedToReconstruction = () => {
+    setCurrentView('case-reconstruction');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -77,6 +108,8 @@ export const App: React.FC = () => {
       ...emptyCaseInput,
       id: `CASE-NS-${Math.floor(1000 + Math.random() * 9000)}`,
     });
+    setDocuments(syntheticDemoDocuments);
+    setFacts(syntheticExtractedFacts);
     setCurrentView('eligibility-checker');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -156,11 +189,56 @@ export const App: React.FC = () => {
           />
         )}
 
-        {currentView === 'evidence-upcoming' && (
-          <EvidenceUpcoming
-            caseData={caseData}
+        {currentView === 'evidence-upload' && (
+          <EvidenceUpload
+            documents={documents}
+            onUpdateDocuments={setDocuments}
+            onProceedToProcessing={handleStartProcessing}
             onBackToIntake={() => {
               setCurrentView('consumer-intake');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+
+        {currentView === 'evidence-processing' && (
+          <EvidenceProcessing
+            documentCount={documents.length}
+            onComplete={handleProcessingComplete}
+          />
+        )}
+
+        {currentView === 'fact-verification' && (
+          <FactVerification
+            facts={facts}
+            conflicts={conflicts}
+            onUpdateFacts={setFacts}
+            onProceedToSummary={handleProceedToSummary}
+            onBackToUpload={() => {
+              setCurrentView('evidence-upload');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+
+        {currentView === 'evidence-summary' && (
+          <EvidenceSummary
+            caseData={caseData}
+            documents={documents}
+            facts={facts}
+            conflicts={conflicts}
+            onProceedToReconstruction={handleProceedToReconstruction}
+            onBackToFacts={() => {
+              setCurrentView('fact-verification');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+
+        {currentView === 'case-reconstruction' && (
+          <CaseReconstructionPlaceholder
+            onBackToSummary={() => {
+              setCurrentView('evidence-summary');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             onReset={handleResetCase}
