@@ -1,3 +1,7 @@
+import { EligibilityResult } from './eligibility';
+
+export * from './eligibility';
+
 export type ProvenanceStatus = 
   | 'Consumer reported' 
   | 'Document supported' 
@@ -43,6 +47,7 @@ export interface ConsumerCaseInput {
   consentGiven: boolean;
   status: 'draft_story' | 'ready_for_evidence' | 'evidence_in_progress';
   createdAt: string;
+  consumerEligibility?: EligibilityResult | null;
 }
 
 export interface CaseCompletenessItem {

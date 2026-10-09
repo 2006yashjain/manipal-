@@ -4,13 +4,15 @@ import { Navbar } from './components/Navbar';
 import { Landing } from './pages/Landing';
 import { RoleSelection } from './pages/RoleSelection';
 import { ReviewerGate } from './pages/ReviewerGate';
+import { EligibilityChecker } from './pages/EligibilityChecker';
 import { ConsumerIntake } from './pages/ConsumerIntake';
 import { EvidenceUpcoming } from './pages/EvidenceUpcoming';
 import { emptyCaseInput } from './data/demoCase';
 import { ConsumerCaseInput } from './types';
+import { EligibilityResult } from './types/eligibility';
 
 export const App: React.FC = () => {
-  // Navigation states: 'landing' | 'role-selection' | 'consumer-intake' | 'reviewer-gate' | 'evidence-upcoming'
+  // Navigation states: 'landing' | 'role-selection' | 'eligibility-checker' | 'consumer-intake' | 'reviewer-gate' | 'evidence-upcoming'
   const [currentView, setCurrentView] = useState<string>('landing');
   const [caseData, setCaseData] = useState<ConsumerCaseInput>(emptyCaseInput);
 
@@ -21,12 +23,29 @@ export const App: React.FC = () => {
   };
 
   const handleSelectConsumer = () => {
-    setCurrentView('consumer-intake');
+    setCurrentView('eligibility-checker');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSelectReviewer = () => {
     setCurrentView('reviewer-gate');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleProceedFromEligibility = (eligibilityResult: EligibilityResult) => {
+    setCaseData((prev) => ({
+      ...prev,
+      consumerEligibility: eligibilityResult,
+      platform: prev.platform || eligibilityResult.rawInput.platformName || '',
+      seller: prev.seller || eligibilityResult.rawInput.sellerName || '',
+      amount: prev.amount || eligibilityResult.rawInput.approximateAmount || '',
+      parties: {
+        ...prev.parties,
+        marketplace: prev.parties.marketplace || eligibilityResult.rawInput.platformName || '',
+        seller: prev.parties.seller || eligibilityResult.rawInput.sellerName || '',
+      }
+    }));
+    setCurrentView('consumer-intake');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -58,7 +77,7 @@ export const App: React.FC = () => {
       ...emptyCaseInput,
       id: `CASE-NS-${Math.floor(1000 + Math.random() * 9000)}`,
     });
-    setCurrentView('consumer-intake');
+    setCurrentView('eligibility-checker');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -110,6 +129,17 @@ export const App: React.FC = () => {
           />
         )}
 
+        {currentView === 'eligibility-checker' && (
+          <EligibilityChecker
+            initialData={caseData.consumerEligibility?.rawInput || null}
+            onProceedToCase={handleProceedFromEligibility}
+            onBackToRoles={() => {
+              setCurrentView('role-selection');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+
         {currentView === 'consumer-intake' && (
           <ConsumerIntake
             caseData={caseData}
@@ -117,6 +147,10 @@ export const App: React.FC = () => {
             onContinueToEvidence={handleContinueToEvidence}
             onBackToRoles={() => {
               setCurrentView('role-selection');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onBackToEligibility={() => {
+              setCurrentView('eligibility-checker');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           />

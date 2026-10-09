@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, ArrowLeft, RotateCcw } from 'lucide-react';
+import { Sparkles, ArrowLeft, RotateCcw, ShieldCheck, AlertCircle, AlertTriangle } from 'lucide-react';
 import { ConsumerCaseInput, IssueCategoryType, RemedyType, InvolvedPartiesInput } from '../types';
 import { syntheticDemoCase, emptyCaseInput } from '../data/demoCase';
 import { ProgressStepper } from '../components/ProgressStepper';
@@ -16,6 +16,7 @@ interface ConsumerIntakeProps {
   onChangeCaseData: (data: ConsumerCaseInput) => void;
   onContinueToEvidence: () => void;
   onBackToRoles: () => void;
+  onBackToEligibility?: () => void;
 }
 
 export const ConsumerIntake: React.FC<ConsumerIntakeProps> = ({
@@ -23,6 +24,7 @@ export const ConsumerIntake: React.FC<ConsumerIntakeProps> = ({
   onChangeCaseData,
   onContinueToEvidence,
   onBackToRoles,
+  onBackToEligibility,
 }) => {
   // Helpers to update specific fields
   const handleFieldChange = (field: keyof ConsumerCaseInput, value: any) => {
@@ -44,6 +46,7 @@ export const ConsumerIntake: React.FC<ConsumerIntakeProps> = ({
     onChangeCaseData({
       ...syntheticDemoCase,
       id: caseData.id || syntheticDemoCase.id,
+      consumerEligibility: caseData.consumerEligibility || null,
     });
   };
 
@@ -51,6 +54,7 @@ export const ConsumerIntake: React.FC<ConsumerIntakeProps> = ({
     onChangeCaseData({
       ...emptyCaseInput,
       id: caseData.id,
+      consumerEligibility: caseData.consumerEligibility || null,
     });
   };
 
@@ -60,6 +64,8 @@ export const ConsumerIntake: React.FC<ConsumerIntakeProps> = ({
     caseData.issueCategory !== null &&
     caseData.consentGiven;
 
+  const elig = caseData.consumerEligibility;
+
   return (
     <div className="py-8 md:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
@@ -67,10 +73,10 @@ export const ConsumerIntake: React.FC<ConsumerIntakeProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200">
         <div>
           <button
-            onClick={onBackToRoles}
+            onClick={onBackToEligibility || onBackToRoles}
             className="text-xs font-semibold text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 transition-colors mb-2"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Role Selection
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Eligibility Screening
           </button>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Create your case
@@ -101,6 +107,37 @@ export const ConsumerIntake: React.FC<ConsumerIntakeProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Eligibility Screening Status Badge Banner */}
+      {elig && (
+        <div className={`mb-6 p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs ${
+          elig.status === 'potentially_within_definition'
+            ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
+            : elig.status === 'potential_statutory_exclusion'
+            ? 'bg-rose-50/70 border-rose-200 text-rose-950'
+            : 'bg-amber-50/70 border-amber-200 text-amber-950'
+        }`}>
+          <div className="flex items-start gap-2.5">
+            {elig.status === 'potentially_within_definition' && <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />}
+            {elig.status === 'further_review_required' && <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />}
+            {elig.status === 'potential_statutory_exclusion' && <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />}
+            <div>
+              <span className="font-bold block">
+                Statutory Screening: {elig.statusLabel} (Section 2(7), CPA 2019)
+              </span>
+              <span className="opacity-90">{elig.summary}</span>
+            </div>
+          </div>
+          {onBackToEligibility && (
+            <button
+              onClick={onBackToEligibility}
+              className="text-[11px] font-bold underline whitespace-nowrap self-end sm:self-center"
+            >
+              Re-screen
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Progress Stepper */}
       <ProgressStepper currentStep={1} />

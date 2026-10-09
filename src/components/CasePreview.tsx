@@ -99,6 +99,22 @@ export const CasePreview: React.FC<CasePreviewProps> = ({
           </span>
         </div>
 
+        {/* Statutory Screening Status */}
+        {caseData.consumerEligibility && (
+          <div className="flex items-start justify-between py-2 border-b border-slate-800">
+            <span className="text-slate-400">Statutory Screening</span>
+            <span className={`font-semibold text-right ${
+              caseData.consumerEligibility.status === 'potentially_within_definition'
+                ? 'text-emerald-400'
+                : caseData.consumerEligibility.status === 'potential_statutory_exclusion'
+                ? 'text-rose-400'
+                : 'text-amber-400'
+            }`}>
+              {caseData.consumerEligibility.statusLabel}
+            </span>
+          </div>
+        )}
+
         {/* Provenance Foundation Note */}
         <div className="bg-slate-850 p-3 rounded-xl border border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-2">
           <ShieldCheck className="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5" />
